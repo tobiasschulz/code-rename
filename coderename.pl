@@ -117,16 +117,8 @@ foreach my $word_index ( 0 .. $lastindex_words )
     my $word_before = $words_before[$word_index];
     my $word_after  = $words_after[$word_index];
 
-    if ( $word_before eq '' || $word_after eq '' )
-    {
-        push @words_before_alternatives, { 'original' => $word_before, };
-        push @words_after_alternatives,  { 'original' => $word_after, };
-    }
-    else
-    {
-        push @words_before_alternatives, { 'original' => $word_before, 'lc' => lc $word_before, 'ucfirst lc' => ucfirst lc $word_before, };
-        push @words_after_alternatives,  { 'original' => $word_after,  'lc' => lc $word_after,  'ucfirst lc' => ucfirst lc $word_after, };
-    }
+    push @words_before_alternatives, { 'original' => $word_before, 'lc' => lc $word_before, 'ucfirst lc' => ucfirst lc $word_before, };
+    push @words_after_alternatives,  { 'original' => $word_after,  'lc' => lc $word_after,  'ucfirst lc' => ucfirst lc $word_after, };
 }
 my $count_words_alternatives             = 3;
 my @words_before_alternatives_variations = get_variations( \@words_before_alternatives );

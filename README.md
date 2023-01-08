@@ -25,9 +25,17 @@ cpanm List::Permutor
 
 ## Example
 
+### Example 1
+
 ```bash
 ../../coderename/coderename.pl "Nowy CitizenPortalWasm" "Nowy CitizenPortal Wasm" && \
 ../../coderename/coderename.pl "Nowy CitizenPortalWeb" "Nowy CitizenPortal Web" && \
 ../../coderename/coderename.pl "Nowy CitizenPortalShared" "Nowy CitizenPortal Shared"
+```
+
+### Example 2
+
+```bash
+../../coderename/coderename.pl "Nowy CitizenPortal Wasm" "Nowy CitizenPortal BlazorWasm" 
 ```
 

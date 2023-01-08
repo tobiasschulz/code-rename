@@ -56,7 +56,7 @@ sub get_variations
 
     foreach my $word_variations_ref (@$input_ref)
     {
-        my @word_variations = @$word_variations_ref;
+        my %word_variations = %$word_variations_ref;
 
         # print "  word_variations: " . ( encode_json \@word_variations ) . "\n";
     }
@@ -72,8 +72,11 @@ sub get_variations
             print "  s_origin: " . ( encode_json $s_origin) . ", values current = " . ( encode_json $input_ref->[$word_index] ) . "\n"
               if 0;
 
-            foreach my $value ( @{ $input_ref->[$word_index] } )
+            my %word_variation = %{ $input_ref->[$word_index] };
+            foreach my $character ( keys %word_variation )
             {
+                my $value = $word_variation{$character};
+
                 my @s = ( @{$s_origin}, $value );
                 push @b, \@s;
             }
@@ -103,15 +106,27 @@ while ( $#words_after < $#words_before )
     push @words_after, '';
 }
 
+my $count_words     = $#words_before + 1;
+my $lastindex_words = $#words_before;
+print "count of words: $count_words\n";
+
 my @words_before_alternatives = ();
-foreach my $word_before (@words_before)
+my @words_after_alternatives  = ();
+foreach my $word_index ( 0 .. $lastindex_words )
 {
-    push @words_before_alternatives, [ $word_before, lc $word_before, ucfirst lc $word_before ];
-}
-my @words_after_alternatives = ();
-foreach my $word_after (@words_after)
-{
-    push @words_after_alternatives, [ $word_after, lc $word_after, ucfirst lc $word_after ];
+    my $word_before = $words_before[$word_index];
+    my $word_after  = $words_after[$word_index];
+
+    if ( $word_before eq '' || $word_after eq '' )
+    {
+        push @words_before_alternatives, { 'original' => $word_before, };
+        push @words_after_alternatives,  { 'original' => $word_after, };
+    }
+    else
+    {
+        push @words_before_alternatives, { 'original' => $word_before, 'lc' => lc $word_before, 'ucfirst lc' => ucfirst lc $word_before, };
+        push @words_after_alternatives,  { 'original' => $word_after,  'lc' => lc $word_after,  'ucfirst lc' => ucfirst lc $word_after, };
+    }
 }
 my $count_words_alternatives             = 3;
 my @words_before_alternatives_variations = get_variations( \@words_before_alternatives );
@@ -126,10 +141,6 @@ foreach my $words_after_alternatives_variation (@words_after_alternatives_variat
 {
     print "- " . ( encode_json \@$words_after_alternatives_variation ) . "\n";
 }
-
-my $count_words     = $#words_before + 1;
-my $lastindex_words = $#words_before;
-print "count of words: $count_words\n";
 
 foreach my $word_index ( 0 .. $lastindex_words )
 {

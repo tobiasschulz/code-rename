@@ -242,18 +242,69 @@ foreach my $replacement_before ( keys %replacements )
 
 ## write script
 
+sub escape_str
+{
+    my ($input) = @_;
+
+    my $shell       = $input;
+    my $shell_regex = $input;
+
+    $shell =~ s/\\/\\\\/gm;
+    $shell =~ s/\\/\\\\/gm;
+
+    $shell_regex =~ s/\\/\\\\/gm;
+    $shell_regex =~ s/\\/\\\\/gm;
+    $shell_regex =~ s/\./\\./gm;
+    $shell_regex =~ s/\./\\./gm;
+
+    return ( $shell, $shell_regex );
+}
+
 my $filename = '/tmp/rename.sh';
 open( my $fh, '>', $filename ) or die "Could not open file '$filename' $!";
-foreach my $replacement_before ( keys %replacements )
+print $fh "find . -depth -type d -delete \n";
+if ( scalar( keys %replacements ) != 0 )
 {
-    my $replacement_after = $replacements{$replacement_before};
+    foreach my $depth ( 1 .. 30 )
+    {
+        print $fh "find . -type d -depth $depth | while read a\n";
+        print $fh "do\n";
+        foreach my $replacement_before ( keys %replacements )
+        {
+            my $replacement_after = $replacements{$replacement_before};
 
-    print $fh 'find . -type d | grep \'' . $replacement_before . '\' | xargs rename -v \'s@' . $replacement_before . '@' . $replacement_after . '@gm\' ' . "\n";
-    print $fh 'find . -type f | grep \'' . $replacement_before . '\' | xargs rename -v \'s@' . $replacement_before . '@' . $replacement_after . '@gm\' ' . "\n";
-    print $fh 'find . -type f | while read a; do gsed -i \'s@' . $replacement_before . '@' . $replacement_after . '@gm\' "$a"; done' . "\n";
+            my ( $replacement_before_shell, $replacement_before_shell_regex ) = escape_str $replacement_before;
+            my ( $replacement_after_shell,  $replacement_after_shell_regex )  = escape_str $replacement_after;
 
-    print "- $replacement_before => $replacement_after\n";
+            print $fh 'rename -fv \'s@' . $replacement_before_shell_regex . '@' . $replacement_after_shell . '@gm\' "$a" ' . "\n";
+
+            print "- $replacement_before => $replacement_after\n";
+        }
+        print $fh "done\n";
+
+        print $fh "find . -type f -depth $depth | while read a\n";
+        print $fh "do\n";
+        foreach my $replacement_before ( keys %replacements )
+        {
+            my $replacement_after = $replacements{$replacement_before};
+
+            my ( $replacement_before_shell, $replacement_before_shell_regex ) = escape_str $replacement_before;
+            my ( $replacement_after_shell,  $replacement_after_shell_regex )  = escape_str $replacement_after;
+
+            print $fh 'file -b --mime-type "$a" | grep text > /dev/null && (' . "\n";
+            print $fh '    gsed -i \'s@' . $replacement_before_shell_regex . '@' . $replacement_after_shell . '@gm\' "$a" ' . "\n";
+            print $fh ')' . "\n";
+
+            print $fh 'rename -fv \'s@' . $replacement_before_shell_regex . '@' . $replacement_after_shell . '@gm\' "$a" ' . "\n";
+
+            print "- $replacement_before => $replacement_after\n";
+        }
+        print $fh "done\n";
+    }
+
 }
+print $fh "find . -depth -type d -delete \n";
+print $fh "git add --all \n";
 close $fh;
 
 system("bash /tmp/rename.sh");

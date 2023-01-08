@@ -17,8 +17,10 @@ cpanm List::Permutor
 
 ```bash
 
-./coderename.pl "Word Abc Def" "Xyz 123"
-./coderename.pl "Word AbcDef" "Xyz 123 456"
+cd PROJECT
+
+../....../coderename.pl "Word Abc Def" "Xyz 123"
+../....../coderename.pl "Word AbcDef" "Xyz 123 456"
 
 
 ```

@@ -50,13 +50,20 @@ sub get_combinations
 
 sub get_variations
 {
-    my ($input_ref) = @_;
+    my ( $input_ref, $use_same_character_as_previous_ref ) = @_;
 
     # print "get_variations: input = " . ( encode_json \@$input_ref ) . "\n";
 
-    foreach my $word_variations_ref (@$input_ref)
+    while ( $#$use_same_character_as_previous_ref < $#$input_ref )
     {
-        my %word_variations = %$word_variations_ref;
+        push @{$use_same_character_as_previous_ref}, 0;
+    }
+
+    print( 'use_same_character_as_previous_ref = ', ( encode_json $use_same_character_as_previous_ref ) . "\n" );
+
+    foreach my $word_variations_by_word_ref (@$input_ref)
+    {
+        my %word_variations_by_word = %$word_variations_by_word_ref;
 
         # print "  word_variations: " . ( encode_json \@word_variations ) . "\n";
     }
@@ -72,12 +79,24 @@ sub get_variations
             print "  s_origin: " . ( encode_json $s_origin) . ", values current = " . ( encode_json $input_ref->[$word_index] ) . "\n"
               if 0;
 
-            my %word_variation = %{ $input_ref->[$word_index] };
-            foreach my $character ( keys %word_variation )
+            my %word_variations = %{ $input_ref->[$word_index] };
+            foreach my $_character ( 'original', 'lc', 'ucfirst lc' )
             {
-                my $value = $word_variation{$character};
+                my $character = $_character;
 
-                my @s = ( @{$s_origin}, $value );
+                if ( $#$s_origin != -1 )
+                {
+                    print( $#$s_origin . ',' . ( encode_json $s_origin ) . "\n" );
+                    my $character_previous = $s_origin->[-1]{'character'};
+                    if ( $use_same_character_as_previous_ref->[$word_index] )
+                    {
+                        $character = $character_previous;
+                    }
+                }
+
+                my $value = $word_variations{$character};
+
+                my @s = ( @{$s_origin}, { 'value' => $value, 'character' => $character, } );
                 push @b, \@s;
             }
         }
@@ -87,7 +106,13 @@ sub get_variations
 
     # print "get_variations: output = " . ( encode_json \@a ) . "\n";
 
-    return @a;
+    my @ret = map {
+
+        # print '$_ = ' . $_ . "\n";
+        [ map { $_->{'value'} } @$_ ]
+    } @a;
+
+    return @ret;
 }
 
 ## words
@@ -110,19 +135,22 @@ my $count_words     = $#words_before + 1;
 my $lastindex_words = $#words_before;
 print "count of words: $count_words\n";
 
-my @words_before_alternatives = ();
-my @words_after_alternatives  = ();
+my @words_before_alternatives      = ();
+my @words_after_alternatives       = ();
+my @use_same_character_as_previous = ();
 foreach my $word_index ( 0 .. $lastindex_words )
 {
     my $word_before = $words_before[$word_index];
     my $word_after  = $words_after[$word_index];
 
+    push @use_same_character_as_previous, ($word_before eq '' || $word_after eq '') ? 1 : 0;
+
     push @words_before_alternatives, { 'original' => $word_before, 'lc' => lc $word_before, 'ucfirst lc' => ucfirst lc $word_before, };
     push @words_after_alternatives,  { 'original' => $word_after,  'lc' => lc $word_after,  'ucfirst lc' => ucfirst lc $word_after, };
 }
 my $count_words_alternatives             = 3;
-my @words_before_alternatives_variations = get_variations( \@words_before_alternatives );
-my @words_after_alternatives_variations  = get_variations( \@words_after_alternatives );
+my @words_before_alternatives_variations = get_variations( \@words_before_alternatives, \@use_same_character_as_previous );
+my @words_after_alternatives_variations  = get_variations( \@words_after_alternatives,  \@use_same_character_as_previous );
 print "words before variations: \n";
 foreach my $words_before_alternatives_variation (@words_before_alternatives_variations)
 {

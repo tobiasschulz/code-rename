@@ -84,21 +84,6 @@ foreach my $separator_combination (@separator_combinations) {
                 $s_before .= $separator_combination[$word_index];
             }
 
-            $details .= '(';
-            $details .=
-              ' word before not empty = '
-              . ( $word_before ne '' ? 1 : 0);
-            $details .= ', ';
-            $details .=
-              ' word before not empty = '
-              . ( $word_after ne '' ? 1 : 0 );
-            $details .= ', ';
-            $details .=
-              ' sep co equal as last = '
-              . ( $separator_combination[ $word_index - 1 ] eq
-                  $separator_combination[$word_index] ? 1 : 0 );
-            $details .= ')';
-
             if (
                 ( $word_after ne '' )
                 and (  $word_before ne ''
@@ -110,7 +95,7 @@ foreach my $separator_combination (@separator_combinations) {
             }
         }
 
-        $details .= ', ';
+        # $details .= ', ';
 
         $s_before .= $word_before;
         $s_after  .= $word_after;

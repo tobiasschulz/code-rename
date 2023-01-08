@@ -248,9 +248,12 @@ foreach my $replacement_before ( keys %replacements )
 {
     my $replacement_after = $replacements{$replacement_before};
 
-    print $fh 'find . -type d | grep \'' . $replacement_before . '\' | xargs rename -v \'s@' . $replacement_before . '@' . $replacement_after . '@gm\' \n';
-    print $fh 'find . -type f | grep \'' . $replacement_before . '\' | xargs rename -v \'s@' . $replacement_before . '@' . $replacement_after . '@gm\' \n';
+    print $fh 'find . -type d | grep \'' . $replacement_before . '\' | xargs rename -v \'s@' . $replacement_before . '@' . $replacement_after . '@gm\' ' . "\n";
+    print $fh 'find . -type f | grep \'' . $replacement_before . '\' | xargs rename -v \'s@' . $replacement_before . '@' . $replacement_after . '@gm\' ' . "\n";
+    print $fh 'find . -type f | while read a; do gsed -i \'s@' . $replacement_before . '@' . $replacement_after . '@gm\' "$a"; done' . "\n";
 
     print "- $replacement_before => $replacement_after\n";
 }
 close $fh;
+
+system("bash /tmp/rename.sh");

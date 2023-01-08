@@ -115,6 +115,24 @@ sub get_variations
     return @ret;
 }
 
+sub escape_str
+{
+    my ($input) = @_;
+
+    my $shell       = $input;
+    my $shell_regex = $input;
+
+    $shell =~ s/\\/\\\\/gm;
+    $shell =~ s/\\/\\\\/gm;
+
+    $shell_regex =~ s/\\/\\\\/gm;
+    $shell_regex =~ s/\\/\\\\/gm;
+    $shell_regex =~ s/\./\./gm;
+    $shell_regex =~ s/\./\./gm;
+
+    return ( $shell, $shell_regex );
+}
+
 ## words
 
 my ( $words_before_str, $words_after_str ) = @ARGV;
@@ -242,24 +260,6 @@ foreach my $replacement_before ( keys %replacements )
 
 ## write script
 
-sub escape_str
-{
-    my ($input) = @_;
-
-    my $shell       = $input;
-    my $shell_regex = $input;
-
-    $shell =~ s/\\/\\\\/gm;
-    $shell =~ s/\\/\\\\/gm;
-
-    $shell_regex =~ s/\\/\\\\/gm;
-    $shell_regex =~ s/\\/\\\\/gm;
-    $shell_regex =~ s/\./\\./gm;
-    $shell_regex =~ s/\./\\./gm;
-
-    return ( $shell, $shell_regex );
-}
-
 my $filename = '/tmp/rename.sh';
 open( my $fh, '>', $filename ) or die "Could not open file '$filename' $!";
 print $fh "find . -depth -type d -delete \n";
@@ -276,7 +276,7 @@ if ( scalar( keys %replacements ) != 0 )
             my ( $replacement_before_shell, $replacement_before_shell_regex ) = escape_str $replacement_before;
             my ( $replacement_after_shell,  $replacement_after_shell_regex )  = escape_str $replacement_after;
 
-            print $fh 'rename -fv \'s@' . $replacement_before_shell_regex . '@' . $replacement_after_shell . '@gm\' "$a" ' . "\n";
+            print $fh 'rename -fv \'s@' . $replacement_before_shell . '@' . $replacement_after_shell . '@gm\' "$a" ' . "\n";
 
             print "- $replacement_before => $replacement_after\n";
         }
@@ -295,11 +295,14 @@ if ( scalar( keys %replacements ) != 0 )
             print $fh '    gsed -i \'s@' . $replacement_before_shell_regex . '@' . $replacement_after_shell . '@gm\' "$a" ' . "\n";
             print $fh ')' . "\n";
 
-            print $fh 'rename -fv \'s@' . $replacement_before_shell_regex . '@' . $replacement_after_shell . '@gm\' "$a" ' . "\n";
+            print $fh 'rename -fv \'s@' . $replacement_before_shell . '@' . $replacement_after_shell . '@gm\' "$a" ' . "\n";
 
             print "- $replacement_before => $replacement_after\n";
         }
         print $fh "done\n";
+
+        print $fh "find . -depth -type d -delete \n";
+        print $fh "git add --all \n";
     }
 
 }

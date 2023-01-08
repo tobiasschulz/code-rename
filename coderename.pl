@@ -143,7 +143,7 @@ foreach my $word_index ( 0 .. $lastindex_words )
     my $word_before = $words_before[$word_index];
     my $word_after  = $words_after[$word_index];
 
-    push @use_same_character_as_previous, ($word_before eq '' || $word_after eq '') ? 1 : 0;
+    push @use_same_character_as_previous, ( $word_before eq '' || $word_after eq '' ) ? 1 : 0;
 
     push @words_before_alternatives, { 'original' => $word_before, 'lc' => lc $word_before, 'ucfirst lc' => ucfirst lc $word_before, };
     push @words_after_alternatives,  { 'original' => $word_after,  'lc' => lc $word_after,  'ucfirst lc' => ucfirst lc $word_after, };
@@ -240,23 +240,17 @@ foreach my $replacement_before ( keys %replacements )
     print "- $replacement_before => $replacement_after\n";
 }
 
-## ...
+## write script
 
-foreach my $word_index ( 0 .. $lastindex_words )
+my $filename = '/tmp/rename.sh';
+open( my $fh, '>', $filename ) or die "Could not open file '$filename' $!";
+foreach my $replacement_before ( keys %replacements )
 {
+    my $replacement_after = $replacements{$replacement_before};
 
-    my $separator_permutor = List::Permutor->new( '-', '_', '.', '/', '\\', '', );
-    while ( my @separator_permutation = $separator_permutor->next() )
-    {
+    print $fh 'find . -type d | grep \'' . $replacement_before . '\' | xargs rename -v \'s@' . $replacement_before . '@' . $replacement_after . '@gm\' \n';
+    print $fh 'find . -type f | grep \'' . $replacement_before . '\' | xargs rename -v \'s@' . $replacement_before . '@' . $replacement_after . '@gm\' \n';
 
-        # print "@separator_permutation\n";
-        my $s = '';
-        foreach my $word_index_inner ( 0 .. $word_index )
-        {
-
-        }
-
-    }
-
+    print "- $replacement_before => $replacement_after\n";
 }
-
+close $fh;

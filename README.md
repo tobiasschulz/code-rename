@@ -1,4 +1,4 @@
-# coderename
+# code-rename
 
 ## Setup
 

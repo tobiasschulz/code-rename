@@ -127,8 +127,8 @@ sub escape_str
 
     $shell_regex =~ s/\\/\\\\/gm;
     $shell_regex =~ s/\\/\\\\/gm;
-    $shell_regex =~ s/\./\./gm;
-    $shell_regex =~ s/\./\./gm;
+    $shell_regex =~ s/\./\\./gm;
+    $shell_regex =~ s/\./\\./gm;
 
     return ( $shell, $shell_regex );
 }

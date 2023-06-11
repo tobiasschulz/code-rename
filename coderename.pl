@@ -250,6 +250,11 @@ foreach my $words_alternatives_variation_index ( 0 .. $#words_before_alternative
     }
 }
 
+foreach my $word_index ( 0 .. $lastindex_words )
+{
+    $replacements{ $words_before[$word_index] } = $words_after[$word_index];
+}
+
 print "replacements:\n";
 foreach my $replacement_before ( keys %replacements )
 {
